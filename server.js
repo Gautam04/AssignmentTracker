@@ -4,7 +4,6 @@ const inert = require('inert');
 const Path = require('path');
 const Joi = require('joi');
 const bcrypt = require('bcrypt');
-// const { rejects } = require('assert');
 const saltRounds = 10;
 
 async function encryptPass(password)
@@ -35,7 +34,7 @@ async function comparePassword(password,encrypted_password)
 
 let init = async function()
 {
-  const sequelize = new Sequelize('testdb', 'maxroach', '', {
+  const sequelize = new Sequelize('assignments', 'maxroach', '', {
     dialect: 'postgres',
     port: 26257,
     logging: false
@@ -55,16 +54,51 @@ let init = async function()
 
 
  let User = sequelize.define('users', {
-  email: { type: Sequelize.STRING,primaryKey:true}, 
+  roll:{type:Sequelize.INTEGER,primaryKey:true},
+  email: { type: Sequelize.STRING},
   name: { type: Sequelize.STRING}, 
   password: {type: Sequelize.STRING},
   phone:{type: Sequelize.INTEGER}
 });
 
+let Assignment = sequelize.define('assignments',{
+  id:{type:Sequelize.STRING, primaryKey:true},
+  name:{type:Sequelize.STRING},
+
+})
+
+let UserAssignment = sequelize.define('userassignments',{
+  assignmentId:{type:Sequelize.STRING,references:{
+    model:Assignment,
+    key:'id'
+  }},
+  userRoll:{type:Sequelize.INTEGER,references:{
+    model:User,
+    key:'roll'
+  }}
+})
+
+// let UserAssignment = sequelize.define('userassignments',{})
+
 User.sync({
   force:false
 })
 
+Assignment.sync({
+  force:false
+})
+
+UserAssignment.sync({
+  force:false
+})
+
+
+// UserAssignment.sync({
+//   force:false
+// })
+
+User.belongsToMany(Assignment, { through: UserAssignment });
+Assignment.belongsToMany(User, { through: UserAssignment });
 
 await server.register([inert]);
 
@@ -93,23 +127,26 @@ server.route({
   }
 });
 
+
+
+
 server.route({
-  method:'GET',
-  path:'/handleChoice',
-  handler:function(req,h)
-  {
-      let choice = req.query.choice;
-      if(choice=='New')
-      {
-        return "New User";
-      } //route to registration page
-      else
-      if(choice=='Old')
-        return "Old User"; //route to the login page
-      else
-        return "Invalid Option" //refresh the page
+  method:'POST',
+  path:'/addAssignment',
+  handler: async function(req,h){
+     let payload = req.payload;
+     //console.log(payload);
+     let id = payload.id
+     let name = payload.name;
+     let x = Assignment.create({id:id,name:name})
+     console.log(x) 
+     console.log("Successfully inserted new record in Assignments table");           
+     //write code to insert record into cockroachd
+     return "Success";
+   
   }
 });
+
 
  server.route({
    method:'POST',
@@ -117,6 +154,7 @@ server.route({
    handler: async function(req,h){
       let payload = req.payload;
       //console.log(payload);
+      let roll = payload.roll
       let name = payload.name;
       let email = payload.email;
       let phoneNumber = payload.phone;
@@ -128,7 +166,7 @@ server.route({
       {
         console.log(err);
       }
-      User.create({name:name,email:email,phone:phoneNumber,password:encrypted_password}) 
+      User.create({roll:roll,name:name,email:email,phone:phoneNumber,password:encrypted_password}) 
       console.log("Successfully inserted new record in Users table");           
       //write code to insert record into cockroachd
       return "Success";
@@ -169,6 +207,38 @@ server.route({
     //create session for user
   }
  });
+
+ server.route({
+  method:'POST',
+  path:'/markcomplete',
+  handler: async function(req,h){
+     let payload = req.payload;
+    //  console.log(payload);
+     let roll = payload.roll
+     let name = payload.name;
+     let email = payload.email;
+     let phoneNumber = payload.phone;
+     let assignment_id = payload.assignment_id;
+     let returned_record = await Assignment.findOne({
+      where:{
+        id:assignment_id
+      }
+    })
+    // console.log(returned_record)
+    let retUser = await User.findOne({
+      where:{
+        roll:roll
+
+      }
+    })
+    console.log(retUser)
+    retUser.addAssignment(returned_record)
+    // returned_record[0].addUser(retUser[0])
+    // UserAssignment.create({assignment_id:'P1',roll:8})
+     return "Success";
+   
+  }
+});
 
  
 
