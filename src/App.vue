@@ -1,48 +1,12 @@
 <template>
   <div id="app">
-    <DashboardHeader v-bind:person="person"/>
-    <AssignmentList v-bind:assignments='assignments' v-on:completed="deleteAssignment"/>
+    <div id="nav">
+      <router-link to="/">Home</router-link> |
+      <router-link to="/about">About</router-link>
+    </div>
+    <router-view/>
   </div>
 </template>
-
-<script>
-
-import DashboardHeader from './components/dashboardheader.vue';
-import AssignmentList from './components/assignmentlist.vue'
-
-export default {
-  name: 'App',
-  data(){
-        return {
-            person:{
-              name:'Gaurav',
-              roll:8,
-            },
-             assignments:[{
-                        id:1,
-                        name:'SHM',
-                        subject:'Physics'
-                    },{
-                         id:2,
-                        name:'Integration',
-                        subject:'Mathematics'
-                    }]
-        }
-    },
-  components: {
-    DashboardHeader,
-    AssignmentList 
-  },
-  methods:{
-    deleteAssignment(id){
-      this.assignments=this.assignments.filter((assignment)=>{
-        return assignment.id!==id;
-      })
-    }
-  }
-
-}
-</script>
 
 <style>
 #app {
@@ -51,6 +15,18 @@ export default {
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
   color: #2c3e50;
-  margin-top: 60px;
+}
+
+#nav {
+  padding: 30px;
+}
+
+#nav a {
+  font-weight: bold;
+  color: #2c3e50;
+}
+
+#nav a.router-link-exact-active {
+  color: #42b983;
 }
 </style>

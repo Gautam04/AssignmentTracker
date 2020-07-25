@@ -5,6 +5,7 @@ const Path = require('path');
 const Joi = require('joi');
 const bcrypt = require('bcrypt');
 const saltRounds = 10;
+const Op = Sequelize.Op
 
 async function encryptPass(password)
 {
@@ -47,7 +48,8 @@ let init = async function()
    routes:{
      files:{
        relativeTo:Path.join(__dirname,'public')
-     }
+     },
+     cors:true
    }
   
  });
@@ -116,14 +118,6 @@ server.route({
   path:'/css/{param}',
   handler:function(req,h){
     return h.file('css/'+req.params.param);
-  }
-});
-
-server.route({
-  method:'GET',
-  path:'/',
-  handler:function(req,h){
-    return h.file("choice.html");
   }
 });
 
@@ -213,7 +207,7 @@ server.route({
   path:'/markcomplete',
   handler: async function(req,h){
      let payload = req.payload;
-    //  console.log(payload);
+     console.log(payload);
      let roll = payload.roll
      let name = payload.name;
      let email = payload.email;
@@ -231,14 +225,46 @@ server.route({
 
       }
     })
-    console.log(retUser)
+    // console.log(retUser)
     retUser.addAssignment(returned_record)
     // returned_record[0].addUser(retUser[0])
     // UserAssignment.create({assignment_id:'P1',roll:8})
-     return "Success";
+    let response = h.response(retUser)
+      response.header('Access-Control-Allow-Origin','http://localhost:8080')
+     return response;
    
   }
 });
+
+
+server.route({
+  method:'GET',
+  path:'/getAssignmentList',
+  handler:async function(req,h){
+
+      let studentRoll = req.query.roll
+      // console.log(studentRoll)
+      const user = await User.findOne({
+        where: { roll: studentRoll },
+        include: Assignment
+      });
+      let completedAssignments = user.assignments.map((assignment)=>assignment.id)
+      // console.log(completedAssignments)
+
+      const assignments = await Assignment.findAll({
+        where:{
+            id:{
+              [Op.notIn]:completedAssignments
+            }
+        }
+      })
+      // console.log(assignments)
+      let response = h.response(assignments)
+      response.header('Access-Control-Allow-Origin','http://localhost:8080')
+      return response
+  }
+
+})
 
  
 
