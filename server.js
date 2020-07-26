@@ -13,7 +13,7 @@ async function encryptPass(password)
   bcrypt.hash(password,saltRounds,function(err,hash){
     if(err)
     reject(Error(err));
-    console.log(hash);
+    // console.log(hash);
     resolve(hash);
   })
 })
@@ -147,7 +147,7 @@ server.route({
    path:'/register',
    handler: async function(req,h){
       let payload = req.payload;
-      //console.log(payload);
+      console.log(payload);
       let roll = payload.roll
       let name = payload.name;
       let email = payload.email;
@@ -160,10 +160,12 @@ server.route({
       {
         console.log(err);
       }
-      User.create({roll:roll,name:name,email:email,phone:phoneNumber,password:encrypted_password}) 
+      let resp = await User.create({roll:roll,name:name,email:email,phone:phoneNumber,password:encrypted_password}) 
       console.log("Successfully inserted new record in Users table");           
       //write code to insert record into cockroachd
-      return "Success";
+      let res = h.response(resp)
+      res.header('Access-Control-Allow-Origin','http://localhost:8080')
+      return res;
     
    }
  });
