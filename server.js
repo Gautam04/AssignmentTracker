@@ -54,6 +54,12 @@ let init = async function()
   
  });
 
+ server.state('session', {
+  ttl: null,
+  isSecure: true,
+  encoding: 'base64json'
+});
+
 
  let User = sequelize.define('users', {
   roll:{type:Sequelize.INTEGER,primaryKey:true},
@@ -177,12 +183,13 @@ server.route({
   handler:async function(req,h)
   {
     let payload = req.payload;
-    let email = payload.email;
+    let roll = payload.roll;
     let password = payload.password;
+    // console.log(req.state.session)
     //get record from db
     let returned_record = await User.findAll({
       where:{
-        email:email
+        roll:roll
 
       }
     })
@@ -190,12 +197,24 @@ server.route({
     try{
       password_flag = await comparePassword(password,returned_record[0].dataValues.password);
       if(password_flag)
-        return returned_record;
+      {
+
+        let res = h.response(returned_record).state('session',{name:returned_record[0].dataValues.name,roll:returned_record[0].dataValues.roll})
+        res.header('Access-Control-Allow-Origin','http://localhost:8080')
+        res.header('Access-Control-Allow-Credentials',true)
+        return res;
+      }
       else
-        return "Wrong Password, Please try again";
+      {
+        let res = h.response("Wrong Password, Please try again")
+        res.header('Access-Control-Allow-Origin','http://localhost:8080')
+        return res
+      }
     }catch(err){
       console.log(err);
-      return "Error has occured";
+      let res = h.response("Error has occured")
+        res.header('Access-Control-Allow-Origin','http://localhost:8080')
+        return res
     }
     // console.log(returned_record);
     
@@ -244,6 +263,8 @@ server.route({
   path:'/getAssignmentList',
   handler:async function(req,h){
 
+
+      console.log(req.state)
       let studentRoll = req.query.roll
       // console.log(studentRoll)
       const user = await User.findOne({
@@ -263,7 +284,19 @@ server.route({
       // console.log(assignments)
       let response = h.response(assignments)
       response.header('Access-Control-Allow-Origin','http://localhost:8080')
+      response.header('Access-Control-Allow-Credentials',true)
       return response
+  }
+
+})
+
+
+server.route({
+  method:'GET',
+  path:'/getUserData',
+  handler:function(req,h){
+
+      return req.state.session
   }
 
 })

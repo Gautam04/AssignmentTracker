@@ -2,12 +2,8 @@
     <div>
         <AssignmentTrackerHeader/>
         <form>
-            <input id='Username'  v-model="name" placeholder="Enter username" type=""/><br>
-            <input id = 'Roll' v-model="roll" placeholder="Roll Number" type="number"/><br>
-            <input id = 'Email' v-model="email" placeholder="Email" type="email"/><br>
-            <input id = 'Phone' v-model="phone" placeholder="Phone Number" type="number"/><br>
+            <input id='Roll'  v-model="roll" placeholder="Enter Roll" type="number"/><br>
             <input id = 'Password' v-model="password" placeholder="Password" type="password"/><br>
-            <input id = 'ConfPass' v-model="confpass"  placeholder="Confirm Password" type="password"/><br>
             <button v-on:click="validateInputs">Submit</button>
         </form>
     </div>
@@ -18,6 +14,7 @@
 import AssignmentTrackerHeader from '../components/assignmentTrackerHeader.vue'
 import axios from 'axios'
 
+
 export default {
     name:'Register',
     components:{
@@ -25,35 +22,26 @@ export default {
     },
     data(){
         return {
-            name:'',
             roll:'',
-            email:'',
-            phone:'',
-            password:'',
-            confpass:''
+            password:''  
         }
     },
     methods:{
         validateInputs()
         {
-            if(this.name && this.roll && this.email && this.phone && this.password && this.confpass)
+    
+            if(this.roll && this.password)
             {
-                if(this.confpass!==this.password)
-                    console.log("Password does not match")
-                else
-                {
-                    axios.post('http://localhost:5050/register',{
-                        name:this.name,
+                    axios.post('http://localhost:5050/login',{
                         roll:this.roll,
-                        email:this.email,
-                        phone:this.phone,
-                        password:this.password
+                        password:this.password,
                     }).then(res => {
                         console.log(res)
-                        this.assignments=res.data
+                        console.log(document.cookie)
+                        
                         this.$router.push("/")
                     }).catch(err => console.log(err))  //TODO: Handle database insert errors here
-                }
+                
             }
             else
             console.log("Fill all fields first")

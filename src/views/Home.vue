@@ -39,16 +39,17 @@ export default {
       axios.post('http://localhost:5050/markcomplete',{
     
           roll: this.person.roll,
-          assignment_id:id
-      }).then((res)=>{
+          assignment_id:id,
+      },{withCredentials:true}).then((res)=>{
         console.log(res)
       }).catch((err)=>console.log(err))
 
     },
   },
   created(){
-      axios.get('http://localhost:5050/getAssignmentList?roll=25').then(res => {
-        console.log(res)
+
+      axios.get('http://localhost:5050/getAssignmentList?roll='+this.person.roll,{withCredentials:true}).then(res => {
+        // console.log(res)
         this.assignments=res.data
         }).catch(err => console.log(err))  
     }
