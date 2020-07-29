@@ -13,7 +13,7 @@ import axios from 'axios'
 
 
 export default {
-  name: 'Home',
+  name: 'Completed',
 
   data(){
         return {
@@ -23,7 +23,7 @@ export default {
             },
             // assignments:[]
              assignments:[],
-             flag:true
+             flag:false
         }
     },
     
@@ -41,7 +41,7 @@ export default {
     
           roll: this.person.roll,
           assignment_id:id,
-      }).then((res)=>{
+      },{withCredentials:true}).then((res)=>{
         console.log(res)
       }).catch((err)=>console.log(err))
 
@@ -49,11 +49,24 @@ export default {
   },
   created(){
 
-      axios.get('http://localhost:5050/getAssignmentList?roll='+this.person.roll,{withCredentials:true}).then(res => {
-        // console.log(res)
-        this.assignments=res.data
-        }).catch(err => console.log(err))  
+      if(this.flag)
+      {
+            axios.get('http://localhost:5050/getAssignmentList?roll='+this.person.roll,{withCredentials:true}).then(res => {
+            // console.log(res)
+            this.assignments=res.data
+            }).catch(err => console.log(err))  
+        }
+        else
+        {
+            axios.get('http://localhost:5050/getCompletedAssignmentList?roll='+this.person.roll,{withCredentials:true}).then(res => {
+            // console.log(res)
+            this.assignments=res.data
+            }).catch(err => console.log(err))
+        }
+
+
     }
+        
 
 }
 </script>

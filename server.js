@@ -56,8 +56,9 @@ let init = async function()
 
  server.state('session', {
   ttl: null,
-  isSecure: true,
-  encoding: 'base64json'
+  isSecure: false,
+  isHttpOnly:true,
+  encoding: 'base64json',
 });
 
 
@@ -194,13 +195,13 @@ server.route({
       }
     })
     console.log(returned_record);
+   
     try{
       password_flag = await comparePassword(password,returned_record[0].dataValues.password);
       if(password_flag)
       {
 
         let res = h.response(returned_record).state('session',{name:returned_record[0].dataValues.name,roll:returned_record[0].dataValues.roll})
-        res.header('Access-Control-Allow-Origin','http://localhost:8080')
         res.header('Access-Control-Allow-Credentials',true)
         return res;
       }
@@ -252,6 +253,7 @@ server.route({
     // UserAssignment.create({assignment_id:'P1',roll:8})
     let response = h.response(retUser)
       response.header('Access-Control-Allow-Origin','http://localhost:8080')
+      response.header('Access-Control-Allow-Credentials',true)
      return response;
    
   }
@@ -264,7 +266,7 @@ server.route({
   handler:async function(req,h){
 
 
-      console.log(req.state)
+      console.log(req.state.session)
       let studentRoll = req.query.roll
       // console.log(studentRoll)
       const user = await User.findOne({
@@ -283,6 +285,32 @@ server.route({
       })
       // console.log(assignments)
       let response = h.response(assignments)
+      response.header('Access-Control-Allow-Origin','http://localhost:8080')
+      response.header('Access-Control-Allow-Credentials',true)
+      return response
+  }
+
+})
+
+
+
+server.route({
+  method:'GET',
+  path:'/getCompletedAssignmentList',
+  handler:async function(req,h){
+
+
+      console.log(req.state.session)
+      let studentRoll = req.query.roll
+      // console.log(studentRoll)
+      const user = await User.findOne({
+        where: { roll: studentRoll },
+        include: Assignment
+      });
+      let completedAssignments = user.assignments
+      // console.log(completedAssignments)
+      // console.log(assignments)
+      let response = h.response(completedAssignments)
       response.header('Access-Control-Allow-Origin','http://localhost:8080')
       response.header('Access-Control-Allow-Credentials',true)
       return response

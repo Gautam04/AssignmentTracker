@@ -2,14 +2,14 @@
     <div id='ListItem'>
         <span><b>{{assignment.id}}.</b>   {{assignment.name}}</span>
         <!-- <input type="checkbox" id='completed'/>       -->
-        <button v-on:click="$emit('markcompleted',assignment.id)">Mark as completed</button>  
+        <button  v-if=" flag" v-on:click="$emit('markcompleted',assignment.id)">Mark as completed</button>  
     </div>
 </template>
 
 <script>
 export default {
     name:'ListItem',
-    props:['assignment']  
+    props:['assignment','flag']  
 }
 </script>
 

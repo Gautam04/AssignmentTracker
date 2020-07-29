@@ -39,7 +39,7 @@ export default {
                         console.log(res)
                         console.log(document.cookie)
                         
-                        this.$router.push("/")
+                        // this.$router.push("/")
                     }).catch(err => console.log(err))  //TODO: Handle database insert errors here
                 
             }

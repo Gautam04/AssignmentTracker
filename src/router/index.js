@@ -3,7 +3,7 @@ import VueRouter from 'vue-router'
 import Home from '../views/Home.vue'
 import Register from '../views/Register.vue'
 import Login from '../views/Login.vue'
-
+import Completed from '../views/Completed.vue'
 
 Vue.use(VueRouter)
 
@@ -12,6 +12,11 @@ Vue.use(VueRouter)
     path: '/',
     name: 'Home',
     component: Home
+  },
+  {
+    path: '/completed',
+    name: 'Completed',
+    component: Completed
   },
   {
     path: '/register',
